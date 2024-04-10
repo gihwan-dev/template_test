@@ -1,29 +1,23 @@
-name: Run pnpm test on PR
-
+name: pnpm Example Workflow
 on:
-  pull_request:
-    branches:
-      - main
-      - master
-
+  push:
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
+  build:
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
-
+        node-version: [15]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
-      - name: Install pnpm
-        run: npm install -g pnpm
       - name: Install dependencies
         run: pnpm install
-      - name: Run tests
+      - name: Run vitest test
         run: pnpm test
