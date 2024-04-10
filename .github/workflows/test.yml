@@ -24,7 +24,7 @@ jobs:
           pnpm test
 
       - name: 실패
-        if: failure()  # 이전 단계에서 실패했을 때만 실행
+        if: failure() # 이전 단계에서 실패했을 때만 실행
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
