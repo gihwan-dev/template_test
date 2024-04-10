@@ -1,0 +1,58 @@
+name: PR 전 테스트 실행
+
+on:
+  pull_request:
+    types:
+      - synchronize
+      - opened
+    paths:
+      - '.'
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: 'pnpm'
+      - run: |
+          pnpm install
+          pnpm test
+
+      - name: 실패
+        if: failure()  # 이전 단계에서 실패했을 때만 실행
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const message = '테스트가 실패했습니다... 😭 코드를 확인해주세요.';
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: message
+            });
+
+      - name: 통과
+
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const message = '테스트가 통과되었습니다.';
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: message
+            });
